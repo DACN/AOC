@@ -95,4 +95,5 @@ for n in numbers:
 print(f'{last_n=}')
 print(f'{last_board}')
 print(f'{boards[last_board]}')
+print(f'{b_comp[last_n]}')
 print(f'{boards[last_board].sum_unmarked()*last_n}')
