@@ -109,6 +109,7 @@ def move10(head, tail1, tail2, tail3, tail4, tail5, tail6, tail7, tail8, tail9, 
         print("==",direction,number,"==\n")
     for i in range(number):
         move_one(head, direction)
+        # debug info added to find the new move for the 10-knot rope
         tail_follow(head, tail1, 'H1')
         tail_follow(tail1, tail2, '12')
         tail_follow(tail2, tail3, '23')
