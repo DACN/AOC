@@ -1,10 +1,11 @@
+import math
 import re
 from aocd.models import Puzzle
 import timeit
 from dataclasses import dataclass
 import dataclasses
 import sys
-
+import timeit
 
 test_data = """Monkey 0:
   Starting items: 79, 98
@@ -41,7 +42,7 @@ def split_on_empty_lines(s):
 
 
 class Monkey:
-    def __init__(self, items, operation, divisible_by, iftrue, iffalse):
+    def __init__(self, items, operation, divisible_by, iftrue, iffalse, part2=False):
         """ Create a new Monkey """
         self.items =  [int(x) for x in re.findall(r'\b\d+\b', items)]
         self.op, self.op_num = re.search(r'old.*?(\+|\*).*?(old|\d+)', operation).groups() 
@@ -51,13 +52,16 @@ class Monkey:
         self.current_item_level = None
         self.monkey_to = None
         self.inspections = 0
+        self.stress_divide = 1 if part2 else 3
+        self.lcm = 1
+        self.part2 = part2
 
     def inspect(self):
         second_value = self.current_item_level if self.op_num=="old" else int(self.op_num)
         if self.op=="+":
-            self.current_item_level = (self.current_item_level + second_value) // 3 
+            self.current_item_level = (self.current_item_level + second_value) // self.stress_divide
         elif self.op == "*":
-            self.current_item_level = (self.current_item_level * second_value) // 3
+            self.current_item_level = (self.current_item_level * second_value) // self.stress_divide
         else:
             print("arg")
             self.exit()
@@ -67,6 +71,8 @@ class Monkey:
     
     def monkey_find(self):
         self.current_item_level = self.items.pop(0)
+        if self.part2:
+            self.current_item_level = self.current_item_level % self.lcm
         self.inspect()
         self.monkey_to = self.iftrue if self.test() else self.iffalse
 
@@ -78,10 +84,8 @@ class Monkey:
 def round():
     for n in range(len(monkeys)):
         m = monkeys[n]
-        print('Monkey', n)
         while m.items:
             to_monkey, item = m.throw()
-            print(' throw', to_monkey, item)
             monkeys[to_monkey].items.append(item)
 
 if __name__=="__main__":
@@ -96,9 +100,30 @@ if __name__=="__main__":
     for lines in monkey_lines:
         arg = lines.split('\n')
         monkeys.append(Monkey(arg[1], arg[2], arg[3], arg[4], arg[5]))
+
     for n in range(20):
         round()
     inspections = [m.inspections for m in monkeys]
     inspections.sort(reverse=True)
+    # print(f"{inspections}")
     print("Problem 1:", inspections[0]*inspections[1])
   
+    monkeys = []    
+    for lines in monkey_lines:
+        arg = lines.split('\n')
+        m = Monkey(arg[1], arg[2], arg[3], arg[4], arg[5], True)
+        monkeys.append(m)
+    # now we try to be efficient for part 2 by putting in the lcm to keep the numbers down
+    lcm = math.lcm(*[m.divisible_by for m in monkeys])
+    for m in monkeys:
+        m.lcm = lcm
+ 
+    start_time = timeit.default_timer()
+    for n in range(10000):
+        round()
+        elapsed = timeit.default_timer() - start_time
+    inspections = [m.inspections for m in monkeys]
+    inspections.sort(reverse=True)
+    # print(f"{inspections}")
+    print("Problem 2:", inspections[0]*inspections[1])
+
