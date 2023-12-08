@@ -97,13 +97,14 @@ if __name__=="__main__":
     print()
     show()
 
+    start_time = timeit.default_timer()
     rocks, min_x, max_x, max_y = set_up_rocks()
     for x in range(1000):
         rocks[max_y+2][x] = "#"
     max_y += 2
     max_x += 2
     min_x -= 2
-    show()
+    # show()
     n = 1
     while True:
         if (rocks[1][499] != ".") and (rocks[1][500] != ".") and (rocks[1][501] != "."):
@@ -111,4 +112,4 @@ if __name__=="__main__":
         rocks = fall(rocks,(500,0))
         n += 1  # if we were success count one more grain
     print('Problem 2: ', n)
-    show()
+    print("took", timeit.default_timer() - start_time)

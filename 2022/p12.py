@@ -47,12 +47,15 @@ def min_in_array(tentative_distanceS, visited):
                 BIG = td
     return cand 
 
-def show():
+def show(visited, tentative_distances, heights):
     for line in visited:
-        print(line)
+        print(line[82:89])
     print()
     for line in tentative_distances:
-        print(line)
+        print(line[82:89])
+    print()
+    for line in heights:
+        print(line[82:89])
 
 def solve():
     n = 0
@@ -62,6 +65,9 @@ def solve():
         nbrs = neighbours((cx, cy), heights)
         if nbrs == []:
             # print("stuck")
+            show(visited[5:10], tentative_distances[5:10], heights[5:10])
+            print(cx, cy)
+            halt()
             visited[cx][cy] = "S"
             # halt()
         for px,py in neighbours((cx, cy), heights):
