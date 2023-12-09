@@ -6,6 +6,8 @@ import sys
 import timeit
 import time
 from operator import itemgetter
+import itertools
+import math
 
 
 def split_on_empty_lines(s):
@@ -27,212 +29,72 @@ def lines_to_nums(s):
     distance = int(''.join(c for c in lines[1] if c.isdigit()))
     return tme, distance
 
-
-def classify_hand_type(s):
-    d = Counter(s).values()
-    if 5 in d:
-        value = '9'  #return 'five'
-    elif 4 in d:
-        value = '8'  #return 'four'
-    elif 3 in d and 2 in d:
-        value = '7'  #return 'full'
-    elif 3 in d:
-        value = '6'  #return 'three'
-    elif 2 in d and 1 in d and len(d)==3:
-        value = '5'  #return 'two_pair'
-    elif 2 in d and 1 in d and len(d)==4:
-        value = '4'  #return 'pair'
-    elif 1 in d and len(d)==5:
-        value = '3'  #return 'high'
+def move_pos(pos, move):
+    if move=="L":
+        pos = map_d[pos][0]
+    elif move=="R":
+        pos = map_d[pos][1]
     else:
-        print('Error in classifying', s)
+        print(f"{instructions=},{move=}")
+        print("error")
         sys.exit()
-    for c in s:
-        if c.isdigit():
-            value = value + '0' + c
-        elif c=='T':
-            value = value + '10'
-        elif c=='J':
-            value = value + '11'
-        elif c=='Q':
-            value = value + '12'
-        elif c=='K':
-            value = value + '13'
-        elif c=='A':
-            value = value + '20'
-    return int(value)
+    return pos
 
-def classify_hand_type_2(s):
-    jokers = s.count('J')
-    s_orig = s
-    s_minus = s.replace('J','')
-    d = Counter(s_minus).values()
-    if jokers == 0:
-        if 5 in d:
-            value = '9'  #return 'five'
-        elif 4 in d:
-            value = '8'  #return 'four'
-        elif 3 in d and 2 in d:
-            value = '7'  #return 'full'
-        elif 3 in d:
-            value = '6'  #return 'three'
-        elif 2 in d and 1 in d and len(d)==3:
-            value = '5'  #return 'two_pair'
-        elif 2 in d and 1 in d and len(d)==4:
-            value = '4'  #return 'pair'
-        elif 1 in d and len(d)==5:
-            value = '3'  #return 'high'
-        else:
-            print('Error in classifying', s)
-            sys.exit()
-        for c in s:
-            if c.isdigit():
-                value = value + '0' + c
-            elif c=='T':
-                value = value + '10'
-            elif c=='J':
-                value = value + '11'
-            elif c=='Q':
-                value = value + '12'
-            elif c=='K':
-                value = value + '13'
-            elif c=='A':
-                value = value + '20'
-        return int(value)
-    elif jokers == 1:
-        if 4 in d:
-            value = '9'  #return 'five'
-        elif 3 in d:
-            value = '8'  #return 'four'
-        elif 2 in d and len(d)==2:  # two pairs upgrade to a full house
-            value = '7'  # full house
-        elif 2 in d:
-            value = '6'  #return 'three'
-        # dont think we can get to two pairs with a joker
-        #    value = '5'  #return 'two_pair'
-        elif 1 in d:
-            value = '4'  #return 'pair'
-        # we can always do better than a high
-        #    value = '3'  #return 'high'
-        else:
-            print('Error in classifying', s)
-            sys.exit()
-        for c in s_orig:
-            if c.isdigit():
-                value = value + '0' + c
-            elif c=='T':
-                value = value + '10'
-            elif c=='J':
-                value = value + '00'
-            elif c=='Q':
-                value = value + '12'
-            elif c=='K':
-                value = value + '13'
-            elif c=='A':
-                value = value + '20'
-        return int(value)
-    elif jokers == 2:
-        if 3 in d:
-            value = '9'  #return 'five'
-        elif 2 in d:
-            value = '8'  #return 'four'
-        else:
-            value = '6'  #return 'three'
-        for c in s_orig:
-            if c.isdigit():
-                value = value + '0' + c
-            elif c=='T':
-                value = value + '10'
-            elif c=='J':
-                value = value + '00'
-            elif c=='Q':
-                value = value + '12'
-            elif c=='K':
-                value = value + '13'
-            elif c=='A':
-                value = value + '20'
-        return int(value)    
-    elif jokers == 3:
-        if 2 in d:
-            value = '9'  #return 'five'
-        else:
-            value = '8'  #return 'four'
-        for c in s_orig:
-            if c.isdigit():
-                value = value + '0' + c
-            elif c=='T':
-                value = value + '10'
-            elif c=='J':
-                value = value + '00'
-            elif c=='Q':
-                value = value + '12'
-            elif c=='K':
-                value = value + '13'
-            elif c=='A':
-                value = value + '20'
-        return int(value)    
-    elif jokers in [4,5]:
-        value = '9'     # return 'five'    
-        for c in s_orig:
-            if c.isdigit():
-                value = value + '0' + c
-            elif c=='T':
-                value = value + '10'
-            elif c=='J':
-                value = value + '00'
-            elif c=='Q':
-                value = value + '12'
-            elif c=='K':
-                value = value + '13'
-            elif c=='A':
-                value = value + '20'
-        return int(value)    
+def puzzle1(instructions, map_d):
+    pos = "AAA"
+    for step, move in enumerate(itertools.cycle(instructions), start=1):
+        pos = move_pos(pos, move)
+        if pos=="ZZZ":
+            break
+    return step
 
 
-def puzzle1(lines):
-    extended_lines = []
-    for line in lines:
-        hand, bid = line.split(' ')
-        extended_lines.append([classify_hand_type(hand), hand, int(bid)])
-    extended_lines = sorted(extended_lines, key=itemgetter(0))
-    value = 0
-    for i, line in enumerate(extended_lines, start=1):
-        value += i*line[2]
-    return value
-
-def puzzle2(lines):
-    extended_lines = []
-    for line in lines:
-        hand, bid = line.split(' ')
-        extended_lines.append([classify_hand_type_2(hand), hand, int(bid)])
-    extended_lines = sorted(extended_lines, key=itemgetter(0))
-    value = 0
-    for i, line in enumerate(extended_lines, start=1):
-        value += i*line[2]
-    return value
+def puzzle2(instructions, map_d):
+    posns = list(m for m in map_d.keys() if m[-1]=="A")
+    for pos in posns:
+        print(pos)
+        for step, move in enumerate(itertools.cycle(instructions), start=1):
+            pos = move_pos(pos, move)
+            if pos[-1]=='Z':
+                break
+        print(pos, step)
+        for step, move in enumerate(itertools.cycle(instructions), start=1):
+            pos = move_pos(pos, move)
+            if pos[-1]=='Z':
+                break
+        print(pos, step)
+        print("-----------")
+    # numbers grabbed directly from running the above code and finding
+    # the length of the loops
+    return math.lcm(22199, 13207, 16579, 18827, 17141, 14893)
 
 
 def get_puzzle_data(year, day, test):
-    puzzle="""32T3K 765
-T55J5 684
-KK677 28
-KTJJT 220
-QQQJA 483"""
+    puzzle="""LLR
+
+AAA = (BBB, BBB)
+BBB = (AAA, ZZZ)
+ZZZ = (ZZZ, ZZZ)"""
     if not test:
-        puzzle = Puzzle(year=2023, day=7).input_data
-    lines = puzzle.split('\n')
-    return lines
+        puzzle = Puzzle(year=2023, day=8).input_data
+    return split_on_empty_lines(puzzle)
 
 
 if __name__=="__main__":
     test = False
     start = time.time()
-    puzzle = get_puzzle_data(2023, 7, test)
+    input = get_puzzle_data(2023, 9, test)
+    instructions, map = input
+    map = map.split('\n')
+    map_d = {}
+    for entry in map:
+        here, there = entry.split(' = ')
+        there = there.replace('(','').replace(')','')
+        there_l, there_r = there.split(', ')
+        map_d[here] = (there_l, there_r)
 
-
-    print(f"{puzzle1(puzzle)=}")
-    # 247961593
-    print(f"{puzzle2(puzzle)=}")
-    # 15290096
+    print(f"{puzzle1(instructions, map_d)=}")
+    # 22199
+    print(f"{puzzle2(instructions, map_d)=}")
 
     print(time.time()-start)
