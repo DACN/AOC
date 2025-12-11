@@ -107,4 +107,6 @@ if __name__=="__main__":
     lines = [line.rstrip() for line in text_file.readlines()]
     bricks = [parse_string_numbers(line) for line in lines]
     print(f"part 1 = ", part1(bricks))
+    seconds = time.time()
     print(f"part 2 = ", part2(bricks))
+    print(time.time()-seconds)

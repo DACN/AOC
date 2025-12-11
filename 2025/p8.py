@@ -5,6 +5,7 @@ import itertools
 import math
 from collections import defaultdict
 from collections import Counter
+import time
 
 def read_data(test):
     if test:
@@ -128,7 +129,11 @@ if __name__=="__main__":
     nodes = [parse_string_numbers(line) for line in lines]
 
     num_connections = 10 if test else 1000
+    seconds = time.time()
     print("part 1 ", part1(nodes, num_connections, True))
+    print(time.time()-seconds)
 
     num_connections = math.inf 
+    seconds = time.time()
     print("part 2 ", part1(nodes, num_connections, False))
+    print(time.time()-seconds)
